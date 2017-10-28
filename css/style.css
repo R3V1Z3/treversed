@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css?family=Swanky+and+Moo+Moo');
+
+@media print {
+  .info {
+    display: none !important;
+  }
+  .ui-resizable-handle {
+    display: none !important;
+  }
+}
+
+.no-transition {
+  transition: none;
+}
+
+@page { size:8.5in 11in; margin: 0.25cm }
+
+* {
+  font-family: 'Swanky and Moo Moo', cursive;
+  margin: 0;
+  padding: 0;
+  line-height: 120%;
+}
+
+body, html, #wrapper, .container {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  vertical-align: baseline;
+  background: transparent;
+  overflow: hidden;
+}
+
+.container {
+  margin: auto;
+}
+
+.inner {
+  transform-origin: center;
+  height: 1000px;
+  width: 2000px;
+  position: fixed;
+}
+
+.inner {
+  transition-duration: 1s;
+  transition-timing-function: ease;
+}
+
+.section {
+  transform-origin: center;
+  display: block;
+  width: 400px;
+  height: 200px;
+  min-width: 200px;
+  min-height: 100px;
+  max-height: 800px;
+  position: absolute;
+  border-radius: 0;
+  padding: 10px 15px;
+  margin: 10px;
+  z-index: 0;
+}
+
+.section {
+  transition-duration: 1s;
+  transition-timing-function: ease;
+}
+
+.section.current {
+  z-index: 1;
+}
+
+.section:hover {
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+}
+
+#custom .section {
+  position: absolute;
+  margin: 10px;
+}
+
+.gd-default .inner::before {
+    position: fixed;
+    pointer-events: none;
+    content: "";
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: ivory; 
+    background-image: 
+    linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+    linear-gradient(#eee .1em, transparent .1em);
+    background-size: 100% 1.2em;
+}
+
+.gd-default .inner::after {
+  position: fixed;
+  pointer-events: none;
+  content: "";
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url(https://ugotsta.github.io/gitdown/assets/paper-watercolor.jpg);
+  background-color: ivory;
+  background-blend-mode: luminosity;
+  mix-blend-mode: multiply;
+}
+
+a {
+  color: purple;
+  text-decoration: none;
+}
+
+.section p {
+  margin: 0;
+  padding: 0;
+}
+
+h1 a, h2 a, h3 a {
+  color: #000;
+}
+
+.section a {
+  border-radius: 5px;
+  padding: 0 6px;
+}
+
+.section a:hover {
+  background: rgba(255,255,255,0.45);
+  box-shadow: 0 0 6px rgba(255,255,255,0.25);
+}
+
+.section a.n-reference:hover {
+  filter: invert(100%);
+  color: black;
+  border: 1px solid black;
+  border-radius: 0px;
+}
+
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  font-weight: normal;
+  margin: 0.5em 0;
+}
+
+.content li::before {
+  content: "\27BA ";
+  opacity: 0.5;
+  margin-right: 6px;
+}
+
+a.n-reference {
+  line-height: 2em;
+  border-radius: 5px;
+  border: 1px dashed purple;
+  background: rgba(0,0,0,0.025);
+}
+
+.reference .handle-heading {
+  float: left;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.handle-heading {
+  z-index: 1;
+  cursor: move;
+}
+
+.section a.handle {
+  font-weight: 100;
+  text-transform: uppercase;
+  padding: 0 6px 0 0;
+}
+
+.section ul {
+  margin-top: 6px;
+  list-style-type: none;
+}
+
+.content a {
+  font-style: italic;
+  border-radius: 5px;
+}
+
+/* Connections */
+
+connection {
+  transition: none;
+  border: 3px dashed purple;
+  opacity: 0.25;
+  z-index: 1;
+  border-radius:100%;
+  pointer-events:none;
+  mix-blend-mode: normal;
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* Info panel */
+
+.info .toc a::before {
+  content: '';
+}
+
+.info .toc a.current {
+  pointer-events: none;
+  color: #FFF9ED;
+}
+
+.info .toc a.current::before {
+  content: "\27BA ";
+}
+
+.toc .hidden {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* Editor */
+#custom .editor {
+  position: absolute;
+  width: 400px;
+  background: black;
+  border: 3px double rgba(255,255,255,0.5);
+  box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
+  margin: 12px;
+  color: white;
+  mix-blend-mode: normal;
+}
+
+#custom .editor .editor-content {
+  padding: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  resize: both;
+  background: none;
+  color: white;
+  border: 0;
+  outline: 1px solid rgba(255,255,255,0.5);
+}
+
+/* Keypress styling */
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  line-height: 10px;
+  vertical-align: middle;
+  color: #000;
+  font-size: 1em;
+  font-weight: bold;
+  background: #F1F0ED;
+  border: 3px double rgba(0,0,0,0.35);
+  padding: 6px 10px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.25);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    background: rgba(255, 255, 255, 0.2);
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    /* border: solid whiteSmoke 4px; */
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
