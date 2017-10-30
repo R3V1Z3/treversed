@@ -417,8 +417,7 @@ jQuery(document).ready(function () {
                     $(eid).append('<div id="gd-export"></div>');
                     content = $('#gd-export').html(content).text();
                     $('#gd-export').remove();
-                    var css = window.localStorage.getItem('gd_theme');
-                    var json = { "css": css, "content": content };
+                    var json = { "content": content };
                     var message = JSON.stringify(json);
                     event.source.postMessage( message, $gd.settings.origin );
                     console.log('Message sent to child window.');
@@ -427,9 +426,11 @@ jQuery(document).ready(function () {
         }, false);
 
         $(eid + ' .info .field.selector.app a.id').click(function (e) {
-            var url = $(this).attr('data-id');
+            
             // configure url with hash and other needed params
-            //url += `?gist=storage&css=storage${location.hash}`;
+            var url = $(this).attr('data-id');
+            var css = $gd.settings.css;
+            url += `?css=${css}${location.hash}`;
 
             // open window, receiveMessage will then wait for Ready message
             win = window.open(url);
