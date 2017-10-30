@@ -5,6 +5,7 @@ var transforms = {
 };
 
 var $t; // will hold container where transforms are made
+var win;
 
 jQuery(document).ready(function () {
 
@@ -405,26 +406,31 @@ jQuery(document).ready(function () {
         }
     }
 
+    // wait for Ready message from open windows
+    function receiveMessage(event) {
+        if ( event.origin !== "http://example.com" ) {
+            if ( event.data === 'Ready.' ) {
+                var content = export_content();
+                $(eid).append('<div id="gd-export"></div>');
+                content = $('#gd-export').html(content).text();
+                $('#gd-export').remove();
+                post_message( event.source, content );
+            }
+        }
+    }
+
     function register_events() {
+
+        // listen for Ready messages from any opened windows
+        window.addEventListener( 'message', receiveMessage, false );
 
         $(eid + ' .info .field.selector.app a.id').click(function (e) {
             var url = $(this).attr('data-id');
-
-            // get content ready for export
-            var content = export_content();
-            $(eid).append('<div id="gd-export"></div>');
-            content = $('#gd-export').html(content).text();
-            $('#gd-export').remove();
-
             // configure url with hash and other needed params
-            url += `?gist=storage&css=storage${location.hash}`;
+            //url += `?gist=storage&css=storage${location.hash}`;
 
-            // TODO: implement postMessage() in GitDown core
-            var popup = window.open(url);
-            
-            // This will successfully queue a message to be sent to the popup, assuming
-            // the window hasn't changed its location.
-            popup.postMessage(content, '*');
+            // open window, receiveMessage will then wait for Ready message
+            win = window.open(url);
         });
 
         // click handler for local links, incuding toc links
