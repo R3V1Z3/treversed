@@ -34,19 +34,6 @@ Appearance <!-- {$gd_css} -->
 
 <!-- {$gd_slider_fontsize="110,50,300,1,%"} -->
 
-Font <!-- {$gd_select_font} -->
-- *Default
-- Anonymous Pro
-- Cousine
-- Cutive Mono
-- Fira Mono
-- Nova Mono
-- Overpass Mono
-- Oxygen Mono
-- Share Tech Mono
-- Space Mono
-- Ubuntu Mono
-
 <!-- {$gd_select_primary-color} -->
 - Default
 - Slategrey

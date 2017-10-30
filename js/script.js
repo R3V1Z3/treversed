@@ -227,15 +227,28 @@ jQuery(document).ready(function () {
         return content;
     }
 
+    function default_transform() {
+        var t = {
+            'scale': 1, 'translateX': '0px', 'translateY': '0px',
+            'perspective': '400px', 'rotateX': '0deg', 'rotateY': '0deg', 'scaleZ': '1',
+            'rotateZ': '0deg', 'translateZ': '0px'
+        };
+        update_transform(t);
+    }
+
     function render_editor(id) {
         // remove any existing editors first
         $('.editor').remove();
+
+        // use basic transform before positioning
+        default_transform();
 
         var $s = $('.section#' + id);
         var left = $s.position().left;
         var top = $s.position().top;
         var width = $s.width();
         var height = $s.height();
+
         var content = toMarkdown($s.find('.content').html());
 
         var html = '<div class="editor" data-section="' + id + '">';
@@ -261,6 +274,9 @@ jQuery(document).ready(function () {
             notize();
             render_connections();
         });
+
+        // restore transform
+        update_transform(transforms);
 
         // hide the editor if anything else is clicked
         $('.inner').on('click', function (e) {
