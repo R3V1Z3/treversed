@@ -417,9 +417,7 @@ jQuery(document).ready(function () {
                     content = $('#gd-export').html(content).text();
                     $('#gd-export').remove();
                     var css = window.localStorage.getItem('gd_theme');
-                    var json = new JSONObject();
-                    json.put("css", css);
-                    json.put("content", content);
+                    var json = { "css": css, "content": content };
                     var message = JSON.stringify(json);
                     event.source.postMessage( message, "https://ugotsta.github.io" );
                     console.log('Message sent to child window.');
