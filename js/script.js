@@ -410,7 +410,8 @@ jQuery(document).ready(function () {
 
         // listen for Ready messages from any opened windows
         window.addEventListener( 'message', function(event) {
-            if ( event.origin === $gd.settings.origin ) {
+            var o = $gd.settings.origin;
+            if ( o === '*' || event.origin === o ) {
                 if ( event.data === 'Ready.' ) {
                     var content = export_content();
                     $(eid).append('<div id="gd-export"></div>');
