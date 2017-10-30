@@ -410,14 +410,18 @@ jQuery(document).ready(function () {
 
         // listen for Ready messages from any opened windows
         window.addEventListener( 'message', function(event) {
-            //console.log('Data received: ' + event.data);
             if ( event.origin === "https://ugotsta.github.io" ) {
                 if ( event.data === 'Ready.' ) {
                     var content = export_content();
                     $(eid).append('<div id="gd-export"></div>');
                     content = $('#gd-export').html(content).text();
                     $('#gd-export').remove();
-                    event.source.postMessage( content, "*" );
+                    var css = window.localStorage.getItem('gd_theme');
+                    var json = new JSONObject();
+                    json.put("css", css);
+                    json.put("content", content);
+                    var message = JSON.stringify(json);
+                    event.source.postMessage( message, "https://ugotsta.github.io" );
                     console.log('Message sent to child window.');
                 }
             }

@@ -95,6 +95,7 @@ Highlight Styles <!-- {$gd_select_highlight} -->
 Try your creation across various apps.
 
 App <!-- {$gd_selector_app} -->
+- [Treverse](//ugotsta.github.io/treverse/)
 - [GitDown](//ugotsta.github.io/gitdown/)
 - [Downslide](//ugotsta.github.io/downslide/)
 - [Entwine](//ugotsta.github.io/downslide/)
