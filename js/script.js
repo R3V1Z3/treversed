@@ -408,13 +408,13 @@ jQuery(document).ready(function () {
 
     // wait for Ready message from open windows
     function receiveMessage(event) {
-        if ( event.origin !== "http://example.com" ) {
+        if ( event.origin === "https://ugotsta.github.io/" ) {
             if ( event.data === 'Ready.' ) {
                 var content = export_content();
                 $(eid).append('<div id="gd-export"></div>');
                 content = $('#gd-export').html(content).text();
                 $('#gd-export').remove();
-                post_message( event.source, content );
+                event.source.postMessage( content, "*" );
             }
         }
     }
