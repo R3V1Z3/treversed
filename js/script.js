@@ -408,15 +408,15 @@ jQuery(document).ready(function () {
 
     // wait for Ready message from open windows
     function receiveMessage(event) {
-        console.log(event.origin);
-        console.log('Date received: ' + event.data);
-        if ( event.origin === "https://ugotsta.github.io/" ) {
+        //console.log('Data received: ' + event.data);
+        if ( event.origin === "https://ugotsta.github.io" ) {
             if ( event.data === 'Ready.' ) {
                 var content = export_content();
                 $(eid).append('<div id="gd-export"></div>');
                 content = $('#gd-export').html(content).text();
                 $('#gd-export').remove();
                 event.source.postMessage( content, "*" );
+                console.log('Message sent to child window.');
             }
         }
     }
