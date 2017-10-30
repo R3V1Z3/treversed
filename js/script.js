@@ -197,6 +197,11 @@ jQuery(document).ready(function () {
 
         // open new window
         var xWindow = window.open('export');
+        var content = export_content();
+        xWindow.document.write(content.replace(/\n\n/g, '<br/>'));
+    }
+
+    function export_content() {
         var content = '<pre>';
         var newline = '\n'; //'<br/>';
 
@@ -219,7 +224,7 @@ jQuery(document).ready(function () {
             content += newline + newline;
         });
         content += newline + '</pre>';
-        xWindow.document.write(content.replace(/\n\n/g, '<br/>'));
+        return content;
     }
 
     function render_editor(id) {
@@ -280,6 +285,11 @@ jQuery(document).ready(function () {
         var w = e.offsetWidth;
         var h = e.offsetHeight;
 
+        // make width adjustment if editor is open for this section
+        if (is_editor_linked(element)) {
+            w += $(eid + ' .editor').width() + 50;
+        }
+
         var maxwidth = window.innerWidth;
         var maxheight = window.innerHeight;
 
@@ -291,6 +301,28 @@ jQuery(document).ready(function () {
         transforms['translateY'] = -translateY + 'px';
 
         update_transform(transforms);
+    }
+
+    // returns true if editor is open and has specified id
+    function is_editor_linked(id) {
+        var $editor = $(eid + ' .editor');
+        if ($editor.length > 0) {
+            var editor_id = $editor.attr('data-section');
+            if (editor_id === id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function position_editor($s) {
+        var left = $s.position().left;
+        var top = $s.position().top;
+        var $editor = $(eid + ' .editor');
+        $editor.css('left', left + $s.width() + 50);
+        $editor.css('top', top);
+        $editor.css('width', $s.width());
+        $editor.css('height', $s.height());
     }
 
     function create_section(x, y) {
@@ -359,6 +391,27 @@ jQuery(document).ready(function () {
 
     function register_events() {
 
+        $(eid + ' .info .field.selector.app a.id').click(function (e) {
+            var url = $(this).attr('data-id');
+
+            // get content ready for export
+            var content = export_content();
+            $(eid).append('<div id="gd-export"></div>');
+            content = $('#gd-export').html(content).text();
+            $('#gd-export').remove();
+
+            // TODO: implement postMessage() in GitDown core
+
+            // store content in browser
+            // window.localStorage.setItem( 'gd_content', content );
+
+            // // configure url with hash and other needed params
+            url += `?gist=storage&css=storage${location.hash}`;
+
+            // var win = window.open(url, '_blank');
+            // win.focus();
+        });
+
         // click handler for local links, incuding toc links
         $('a[href^=#]').click(function (e) {
             var id = this.getAttribute('href').substr(1);
@@ -371,14 +424,6 @@ jQuery(document).ready(function () {
         $(eid + ' .section').click(function () {
             var id = $(this).attr('id');
             activate_section(id);
-        });
-
-        // open editor on content click
-        $('.content').click(function () {
-            var id = $(this).parent().attr('id');
-            render_editor(id);
-            transform_focus(id);
-            render_connections();
         });
 
         // Key events
@@ -398,91 +443,6 @@ jQuery(document).ready(function () {
             var href = $(this).attr('href');
             //$(href).css( 'filter', 'invert(0%)' );
         });
-
-        // target elements with the "draggable" class
-        interact('.draggable').allowFrom('.handle-heading')
-            .draggable({
-                // enable inertial throwing
-                inertia: false,
-                // keep the element within the area of it's parent
-                restrict: {
-                    restriction: 'self',
-                    endOnly: true,
-                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-                },
-                // enable autoScroll
-                autoScroll: true,
-
-                // call this function on every dragmove event
-                onmove: dragMoveListener,
-                // call this function on every dragend event
-                onend: function (event) {
-                }
-            });
-
-        // target elements with the "draggable" class
-        interact('.inner').draggable({
-            // enable inertial throwing
-            inertia: false,
-
-            // enable autoScroll
-            autoScroll: true,
-
-            // call this function on every dragmove event
-            onmove: dragMoveListener
-
-        });
-
-        // make sections resizable
-        interact('.section').resizable({
-            preserveAspectRatio: false,
-            edges: { left: true, right: true, bottom: true, top: true }
-        })
-            .on('resizemove', function (event) {
-                var target = event.target,
-                    x = (parseFloat(target.getAttribute('data-x')) || 0),
-                    y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-                // update the element's style
-                target.style.width = event.rect.width + 'px';
-                target.style.height = event.rect.height + 'px';
-
-                // translate when resizing from top or left edges
-                x += event.deltaRect.left;
-                y += event.deltaRect.top;
-
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
-
-                // check if editor is open for this section
-                var id = target.getAttribute('id');
-                // todo
-                var $editor = $(eid + ' .editor');
-                if ( $editor.length > 0 ) {
-                    var editor_id = $editor.attr('data-section');
-                    if ( editor_id === id ) {
-                        $editor.width( event.rect.width );
-                        $editor.height( event.rect.height );
-                        $editor.css('left', x + event.rect.width + 50 );
-                        $editor.css('top', y );
-                    }
-                }
-
-                render_connections();
-            });
-
-        interact('.inner')
-            .on('tap', function (event) {
-                //event.preventDefault();
-            })
-            .on('doubletap', function (event) {
-                // create new section
-                event.preventDefault();
-                create_section(event.pageX, event.pageY);
-            })
-            .on('hold', function (event) {
-                // event.clientX
-            });
 
         // mousewheel zoom handler
         $('.inner').on('wheel', function (event) {
@@ -504,34 +464,118 @@ jQuery(document).ready(function () {
             update_transform(transforms);
             render_connections();
         });
-    }
 
-    // drag handler
-    function dragMoveListener(event) {
-        var target = event.target;
-        var $target = $(target);
+        // handle panning with .inner drag
+        interact('.inner').draggable({
+            // enable inertial throwing
+            inertia: false,
+            ignoreFrom: '.section',
+            // call this function on every dragmove event
+            onmove: function (event) {
+                var target = event.target;
+                var $target = $(target);
+                // todo
+                // problem: this will always be .inner because draggable
+                // if we use document event then we can ensure 'this' is strictly .inner
+                var tx = parseFloat(transforms['translateX']) + event.dx;
+                var ty = parseFloat(transforms['translateY']) + event.dy;
+                transforms['translateX'] = tx + 'px';
+                transforms['translateY'] = ty + 'px';
+                update_transform(transforms);
+                render_connections();
+            }
+        })
+            .on('tap', function (event) {
+                //event.preventDefault();
+            })
+            .on('doubletap', function (event) {
+                if ($(event.target).hasClass('inner')) {
+                    // create new section
+                    event.preventDefault();
+                    create_section(event.pageX, event.pageY);
+                }
+            })
+            .on('hold', function (event) {
+                // event.clientX
+            });
 
-        // keep the dragged position in the data-x/data-y attributes
-        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+        // target elements with the "draggable" class
+        interact('.section')//.allowFrom('.handle-heading')
+            .draggable({
+                // enable inertial throwing
+                inertia: false,
+                // keep the element within the area of it's parent
+                restrict: {
+                    restriction: 'self',
+                    endOnly: true,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                },
+                // enable autoScroll
+                autoScroll: true,
+                // call this function on every dragmove event
+                onmove: function (event) {
+                    var target = event.target;
+                    var $target = $(target);
 
-        if ($target.hasClass('inner')) {
-            var tx = parseFloat(transforms['translateX']);
-            var ty = parseFloat(transforms['translateY']);
-            tx += event.dx;
-            ty += event.dy;
-            transforms['translateX'] = tx + 'px';
-            transforms['translateY'] = ty + 'px';
-            update_transform(transforms);
-        } else {
-            $target.css('top', y + 'px');
-            $target.css('left', x + 'px');
+                    // keep the dragged position in the data-x/data-y attributes
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-            // update the position attributes
-            $target.attr('data-x', x);
-            $target.attr('data-y', y);
-        }
-        render_connections();
+                    $target.css('top', y + 'px');
+                    $target.css('left', x + 'px');
+
+                    // adjust editor based on selected section position
+                    var id = target.getAttribute('id');
+                    if (is_editor_linked(id)) {
+                        if ($target.hasClass('section')) {
+                            position_editor($target);
+                        }
+                    }
+
+                    // update the position attributes
+                    $target.attr('data-x', x);
+                    $target.attr('data-y', y);
+
+                    render_connections();
+                }
+            })
+            .resizable({
+                preserveAspectRatio: false,
+                edges: { left: true, right: true, bottom: true, top: true }
+            })
+            .on('resizemove', function (event) {
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                // update the element's style
+                target.style.width = event.rect.width + 'px';
+                target.style.height = event.rect.height + 'px';
+
+                // translate when resizing from top or left edges
+                x += event.deltaRect.left;
+                y += event.deltaRect.top;
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+
+                // check if editor is open for this section
+                var id = target.getAttribute('id');
+                if (is_editor_linked(id)) {
+                    position_editor($(target));
+                }
+
+                render_connections();
+            })
+            .on('doubletap', function (event) {
+                //var id = event.target;//.getAttribute('id');
+                var id = $(event.target).closest('.section').attr('id');
+                console.log(id);
+                render_editor(id);
+                transform_focus(id);
+                render_connections();
+            });
+
     }
 
 });
