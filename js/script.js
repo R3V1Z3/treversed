@@ -431,6 +431,7 @@ jQuery(document).ready(function () {
 
             // open window, receiveMessage will then wait for Ready message
             win = window.open(url);
+            win.postMessage('Hello?', '*');
         });
 
         // click handler for local links, incuding toc links
