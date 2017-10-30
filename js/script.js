@@ -416,16 +416,15 @@ jQuery(document).ready(function () {
             content = $('#gd-export').html(content).text();
             $('#gd-export').remove();
 
-            // TODO: implement postMessage() in GitDown core
-
-            // store content in browser
-            // window.localStorage.setItem( 'gd_content', content );
-
-            // // configure url with hash and other needed params
+            // configure url with hash and other needed params
             url += `?gist=storage&css=storage${location.hash}`;
 
-            // var win = window.open(url, '_blank');
-            // win.focus();
+            // TODO: implement postMessage() in GitDown core
+            var popup = window.open(url);
+            
+            // This will successfully queue a message to be sent to the popup, assuming
+            // the window hasn't changed its location.
+            popup.postMessage(content, '*');
         });
 
         // click handler for local links, incuding toc links
