@@ -25,6 +25,9 @@ jQuery(document).ready(function () {
 
     function main() {
         $t = $('.inner').addClass('inner no-transition');
+
+        configure_mode();
+
         position_sections();
         configure_sections();
         notize();
@@ -35,8 +38,28 @@ jQuery(document).ready(function () {
         // center on header section by clicking it
         var $c = $(eid + ' .info .toc a.current');
         $c.removeClass('current').click().addClass('current');
+
+        // for cases where only one section exists
+        var id = $(eid + ' .section.current').attr('id');
+        if ( $gd.settings.loaded ) {
+            transform_focus(id);
+        }
     }
 
+    function configure_mode() {
+        var mode = $gd.settings.heading;
+        if ( mode === 'p' ) {
+            $(eid).addClass('gd-lyrics');
+            $(eid + ' .section.heading').each(function(){
+                var heading = $(this).find('a.handle').html();
+                var $c = $(this).find('.handle-heading');
+                heading = `<div class="content">${heading}</div>`;
+                $c.after(heading);
+            });
+            // hide headings
+            $(eid + ' .section.heading .handle-heading').hide();
+        }
+    }
     function update_transform(t) {
 
         // ensure viewport doesn't go outside bounds
@@ -46,6 +69,9 @@ jQuery(document).ready(function () {
         // account for scaling
         var scale = parseFloat(t['translateZ']) / 100;
 
+        if ( x > 0 ) x = 0;
+        if ( y > 0 ) y = 0;
+        
         t['translateX'] = x + 'px';
         t['translateY'] = y + 'px';
 
@@ -59,7 +85,7 @@ jQuery(document).ready(function () {
 
     // t = true when rendering transforms
     function render_values() {
-        $f = $(`.info .collapsible.perspective .field.slider`);
+        $f = $(eid + ` .info .collapsible.perspective .field.slider`);
         $f.each(function () {
             var $i = $(this).find('input');
             var name = $i.attr('name');
@@ -72,16 +98,15 @@ jQuery(document).ready(function () {
     }
 
     function position_sections() {
-
+        
         // start by adding some padding around .inner
         var w = inner_width;
         var h = inner_height;
 
-        $('.inner').width( w + w / 2 );
-        $('.inner').height( h + h / 2 );
+        $(eid_inner).width( w + w/2 );
+        $(eid_inner).height( h + h/2 );
 
-        var docwidth = $('.inner').width();
-        var $sections = $('.section *');
+        var $sections = $(eid + ' .section *');
         if ($sections.length > 0) {
             // find attributes and position section
             $sections.children().each(function () {
@@ -110,31 +135,43 @@ jQuery(document).ready(function () {
         }
 
         // now position elements that don't have position comments
-        var counter = 0;
-        var left = w / 8;
-        var top = h / 8;
         var padding = 20;
+        var divisor = 8;
+        if ( $gd.settings.heading === 'p' ) {
+            padding = 10;
+            divisor = 2;
+        }
+        var counter = 0;
+        var left = w / divisor;
+        var top = h / divisor;
         var row_height = 0;
-        $('.section').each(function () {
-            var position = $(this).position();
+        $(eid + ' .section').each(function () {
 
             // calculate and update section height
-            var height = $(this).find('.handle-heading').height();
-            height += $(this).find('.content').height();
-            $(this).height(height + padding);
+            var height = $(this).find('.content').height();
+            var $heading = $(this).find('.handle-heading');
+            if ( $heading.is(":visible") ) {
+                height += $(this).find('.handle-heading').height();
+            }
 
             // row_height will be the height of the tallest section in the current row
             if (height > row_height) {
                 row_height = height;
             }
 
-            if (position.top === 0 && position.left === 0) {
+            var x = parseFloat( $(this).css('left') );
+            var y = parseFloat( $(this).css('top') );
+            if ( x === 0 && y === 0 ) {
+                $(this).height(height + padding);
                 // set default values for section positions
                 if (counter > 0) {
                     var prev_width = $(this).prev('.section').width() + padding;
+                    // setup allowed_width to enforce single column when p tag used for heading
+                    var allowed_width = w;
+                    if ( $gd.settings.heading === 'p' ) allowed_width = prev_width;
                     // increment height if width of document is surpassed
-                    if (left > docwidth - (prev_width * 2)) {
-                        left = w / 8;
+                    if (left > allowed_width - (prev_width * 2)) {
+                        left = w / divisor;
                         top += row_height + padding;
                         row_height = 0;
                     } else {
@@ -148,7 +185,7 @@ jQuery(document).ready(function () {
     }
 
     function configure_sections() {
-        $('.section').each(function () {
+        $(eid + ' .section').each(function () {
 
             var $s = $(this);
             $s.addClass('no-transition draggable');
@@ -162,7 +199,7 @@ jQuery(document).ready(function () {
     }
 
     function notize() {
-        $('.section').each(function () {
+        $(eid + ' .section').each(function () {
             var $s = $(this);
             var name = $s.find('a.handle').attr('name');
             // check if any anchor links reference this setion and add respective classes if so
@@ -183,10 +220,10 @@ jQuery(document).ready(function () {
     }
 
     function render_connections() {
-        if ($('connection').length > 0) {
-            $('.n-reference').connections('remove');
+        if ( $(' connection').length > 0 ) {
+            $(' .n-reference').connections('remove');
         }
-        $('.section .content .n-reference').each(function () {
+        $(' .section .content .n-reference').each(function () {
             var classes = $(this).attr('class');
             // get note's referent
             var to = classes.split('n-reference')[0].trim();
@@ -208,7 +245,7 @@ jQuery(document).ready(function () {
         var newline = '\n'; //'<br/>';
 
         // iterate over all sections to get content
-        $('.section').each(function () {
+        $(eid + ' .section').each(function () {
 
             // get content
             content += toMarkdown($(this).html());
@@ -240,7 +277,7 @@ jQuery(document).ready(function () {
 
     function render_editor(id) {
         // remove any existing editors first
-        $('.editor').remove();
+        $(eid + ' .editor').remove();
 
         // use basic transform before positioning
         default_transform();
@@ -259,17 +296,17 @@ jQuery(document).ready(function () {
         html += '</pre>';
         html += '<textarea class="editor-content" />';
         html += '</div>';
-        $('.inner').append(html);
+        $(eid_inner).append(html);
         var $editor = $('.editor');
         //$editor.width( width );
         $editor.css({
             top: top, left: left + width + 50,
             width: width, height: height
         });
-        $('.editor-content').val($('.md').text());
+        $(eid + ' .editor-content').val($('.md').text());
 
         // event handler for editor content changes
-        $('.editor-content').on('keyup change', function () {
+        $(eid + ' .editor-content').on('keyup change', function () {
             content = $('.editor-content').val();
             var container = '.section#' + id + ' .content';
             $gd.render(content, container);
@@ -281,7 +318,7 @@ jQuery(document).ready(function () {
         update_transform(transforms);
 
         // hide the editor if anything else is clicked
-        $('.inner').on('click', function (e) {
+        $(eid_inner).on('click', function (e) {
             // if (e.target !== this) return;
             if ($(e.target).closest(".section").length === 0) {
                 if ($(e.target).closest(".editor").length === 0) {
@@ -290,7 +327,7 @@ jQuery(document).ready(function () {
             }
         });
 
-        $('.editor .md').remove();
+        $(eid + ' .editor .md').remove();
 
     }
 
@@ -439,7 +476,7 @@ jQuery(document).ready(function () {
         });
 
         // click handler for local links, incuding toc links
-        $('a[href^=#]').click(function (e) {
+        $(eid + ' a[href^=#]').click(function (e) {
             var id = this.getAttribute('href').substr(1);
             activate_section(id);
             transform_focus(id);
@@ -471,14 +508,14 @@ jQuery(document).ready(function () {
         });
 
         // mousewheel zoom handler
-        $('.inner').on('wheel', function (event) {
+        $(eid_inner).on('wheel', function (event) {
             event.preventDefault();
             if (this !== event.target) return;
             var scale = parseFloat(transforms['translateZ']);
             if (event.originalEvent.deltaY < 0) {
-                scale += 10;
+                scale += 20;
             } else {
-                scale -= 10;
+                scale -= 20;
             }
             if (scale < -500) {
                 scale = -500;
@@ -491,8 +528,8 @@ jQuery(document).ready(function () {
             render_connections();
         });
 
-        // handle panning with .inner drag
-        interact('.inner').draggable({
+        // .section interactions
+        interact(eid_inner).draggable({
             // enable inertial throwing
             inertia: false,
             ignoreFrom: '.section',
@@ -525,8 +562,8 @@ jQuery(document).ready(function () {
                 // event.clientX
             });
 
-        // target elements with the "draggable" class
-        interact('.section')//.allowFrom('.handle-heading')
+        // allow dragging of sections
+        interact(eid + ' .section')//.allowFrom('.handle-heading')
             .draggable({
                 // enable inertial throwing
                 inertia: false,
@@ -596,7 +633,6 @@ jQuery(document).ready(function () {
             .on('doubletap', function (event) {
                 //var id = event.target;//.getAttribute('id');
                 var id = $(event.target).closest('.section').attr('id');
-                console.log(id);
                 render_editor(id);
                 transform_focus(id);
                 render_connections();

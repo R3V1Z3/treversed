@@ -1,30 +1,36 @@
 # TreversED
-The open canvas for creativity.
-- [What's it do?](#about-treversed)
-- [What's Markdown?](#what-is-markdown)
-- [How do I use this beast?](#how-to-use-treversed)
-<!-- {left:53px,top:34px,width:246px,height:171px} -->
 
+Where the brain meets an open canvas built to help it do creative magic. Write, draw, chart ideas and make magic happen.
+*   [What’s it do?](#about-treversed)
+*   [What’s Markdown?](#what-is-markdown)
+*   [How do I use this beast?](#how-to-use-treversed)
+
+<!-- {left:75px,top:137px,width:348px,height:262px} -->
 ## About TreversED
+
 TreversED parses Markdown documents into sections and renders them in a large interactive canvas. Users can navigate the documents by clicking local links or via the `Contents` section in the `Info` panel.
-- [What's this Markdown?](#what-is-markdown)
-- [How do I use Treverse?](#how-to-use-treversed)
-<!-- {left:196px,top:297.8000183105469px,width:326px,height:200px} -->
+*   [What’s this Markdown?](#what-is-markdown)
+*   [How do I use Treverse?](#how-to-use-treversed)
 
+<!-- {left:240px,top:575.7999877929688px,width:420px,height:250px} -->
 ## What is Markdown
-Markdown is a simple, plain text language sort of like BBCode. It lets you create documents quickly using basic symbols.
-- [How do I use Treverse?](#how-to-use-treversed)
-<!-- {left:505px,top:128px,width:400px,height:200px} -->
 
+Markdown is a simple, plain text language sort of like BBCode. It lets you create documents quickly using basic symbols.
+*   [How do I use Treverse?](#how-to-use-treversed)
+
+<!-- {left:640px,top:16px,width:422px,height:158px} -->
 ## How to use TreversED
-It's easy. Create a file at GitHub Gist, get the file's ID then paste it in the Gist field in the Info panel.
-- [Cool, take me back to the start.](#treversed)
-<!-- {left:700px,top:300px,width:400px,height:200px} -->
+
+It’s easy. Create a file at GitHub Gist, get the file’s ID then paste it in the Gist field in the Info panel.
+*   [Cool, take me back to the start.](#treversed)
+
+<!-- {left:828px,top:429px,width:416px,height:166px} -->
+
 
 ## Examples <!-- {$gd_info} -->
 <!-- {$gd_help_ribbon} -->
 
-The open canvas for creativity.
+Where brain meets canvas.
 
 Examples Gists <!-- {$gd_gist} -->
 - [Await](//gist.github.com/Ugotsta/eb48e3ccd0e0fc6a502a8ebe02a38715)
@@ -33,7 +39,7 @@ Examples Gists <!-- {$gd_gist} -->
 
 Appearance <!-- {$gd_css} -->
 
-<!-- {$gd_slider_fontsize="110,50,300,1,%"} -->
+<!-- {$gd_slider_fontsize="130,50,300,1,%"} -->
 
 <!-- {$gd_select_primary-color} -->
 - Default
