@@ -26,8 +26,6 @@ jQuery(document).ready(function () {
     function main() {
         $t = $('.inner').addClass('inner no-transition');
 
-        configure_mode();
-
         position_sections();
         configure_sections();
         notize();
@@ -46,20 +44,6 @@ jQuery(document).ready(function () {
         }
     }
 
-    function configure_mode() {
-        var mode = $gd.settings.heading;
-        if ( mode === 'p' ) {
-            $(eid).addClass('gd-lyrics');
-            $(eid + ' .section.heading').each(function(){
-                var heading = $(this).find('a.handle').html();
-                var $c = $(this).find('.handle-heading');
-                heading = `<div class="content">${heading}</div>`;
-                $c.after(heading);
-            });
-            // hide headings
-            $(eid + ' .section.heading .handle-heading').hide();
-        }
-    }
     function update_transform(t) {
 
         // ensure viewport doesn't go outside bounds
@@ -103,10 +87,10 @@ jQuery(document).ready(function () {
         var w = inner_width;
         var h = inner_height;
 
-        $(eid_inner).width( w + w/2 );
-        $(eid_inner).height( h + h/2 );
+        $('.inner').width( w + w/2 );
+        $('.inner').height( h + h/2 );
 
-        var $sections = $(eid + ' .section *');
+        var $sections = $('.section *');
         if ($sections.length > 0) {
             // find attributes and position section
             $sections.children().each(function () {
@@ -137,7 +121,7 @@ jQuery(document).ready(function () {
         // now position elements that don't have position comments
         var padding = 20;
         var divisor = 8;
-        if ( $gd.settings.heading === 'p' ) {
+        if ( $gd.settings.heading === 'p' || $gd.settings.heading === 'lyrics' ) {
             padding = 10;
             divisor = 2;
         }
@@ -168,7 +152,7 @@ jQuery(document).ready(function () {
                     var prev_width = $(this).prev('.section').width() + padding;
                     // setup allowed_width to enforce single column when p tag used for heading
                     var allowed_width = w;
-                    if ( $gd.settings.heading === 'p' ) allowed_width = prev_width;
+                    if ( $gd.settings.heading === 'p' || $gd.settings.heading === 'lyrics' ) allowed_width = prev_width;
                     // increment height if width of document is surpassed
                     if (left > allowed_width - (prev_width * 2)) {
                         left = w / divisor;
