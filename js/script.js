@@ -371,8 +371,8 @@ jQuery(document).ready(function () {
     }
 
     function position_editor($s) {
-        var left = $s.position().left;
-        var top = $s.position().top;
+        var left = parseFloat( $s.css('left') );
+        var top = parseFloat( $s.css('top') );
         var $editor = $(eid + ' .editor');
         $editor.css('left', left + $s.width() + 50);
         $editor.css('top', top);
@@ -520,9 +520,12 @@ jQuery(document).ready(function () {
             if (scale < -500) {
                 scale = -500;
             }
+
+            // center scale on cursor position
             var x = event.originalEvent.offsetX;
             var y = event.originalEvent.offsetY;
             $('.inner').css('transform-origin', `${x}px ${y}px`);
+            
             transforms['translateZ'] = scale + 'px';
             update_transform(transforms);
             render_connections();
@@ -537,9 +540,6 @@ jQuery(document).ready(function () {
             onmove: function (event) {
                 var target = event.target;
                 var $target = $(target);
-                // todo
-                // problem: this will always be .inner because draggable
-                // if we use document event then we can ensure 'this' is strictly .inner
                 var tx = parseFloat(transforms['translateX']) + event.dx;
                 var ty = parseFloat(transforms['translateY']) + event.dy;
                 transforms['translateX'] = tx + 'px';
@@ -562,7 +562,7 @@ jQuery(document).ready(function () {
                 // event.clientX
             });
 
-        // allow dragging of sections
+        // section interactions
         interact(eid + ' .section')//.allowFrom('.handle-heading')
             .draggable({
                 // enable inertial throwing
