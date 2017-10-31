@@ -27,6 +27,7 @@ It's easy. Create a file at GitHub Gist, get the file's ID then paste it in the 
 The open canvas for creativity.
 
 Examples Gists <!-- {$gd_gist} -->
+- [Await](//gist.github.com/Ugotsta/eb48e3ccd0e0fc6a502a8ebe02a38715)
 
 <!-- {$gd_collapsible_theme} -->
 

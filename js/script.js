@@ -20,6 +20,9 @@ jQuery(document).ready(function () {
     var eid = '#wrapper';
     var eid_inner = eid + ' .inner';
 
+    var inner_width = $(eid_inner).width();
+    var inner_height = $(eid_inner).height();
+
     function main() {
         $t = $('.inner').addClass('inner no-transition');
         position_sections();
@@ -71,13 +74,11 @@ jQuery(document).ready(function () {
     function position_sections() {
 
         // start by adding some padding around .inner
-        var w = $('.inner').width();
-        var h = $('.inner').height();
+        var w = inner_width;
+        var h = inner_height;
 
-        if (!$gd.loaded) {
-            $('.inner').width(w + w / 2);
-            $('.inner').height(h + h / 2);
-        }
+        $('.inner').width( w + w / 2 );
+        $('.inner').height( h + h / 2 );
 
         var docwidth = $('.inner').width();
         var $sections = $('.section *');
