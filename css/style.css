@@ -111,7 +111,7 @@ body, html, #wrapper, .container {
 }
 
 a {
-  color: purple;
+  color: firebrick;
   text-decoration: none;
 }
 
@@ -137,8 +137,6 @@ h1 a, h2 a, h3 a {
 .section a.n-reference:hover {
   filter: invert(100%);
   color: black;
-  border: 1px solid black;
-  border-radius: 0px;
 }
 
 .content h3,
@@ -158,7 +156,7 @@ h1 a, h2 a, h3 a {
 a.n-reference {
   line-height: 2em;
   border-radius: 5px;
-  border: 1px dashed purple;
+  border: 1px dashed firebrick;
   background: rgba(0,0,0,0.025);
 }
 
@@ -194,7 +192,7 @@ a.n-reference {
 
 connection {
   transition: none;
-  border: 3px dashed purple;
+  border: 3px dashed firebrick;
   opacity: 0.25;
   z-index: 1;
   border-radius:100%;

@@ -1,11 +1,12 @@
 var transforms = {
     'scale': 1, 'translateX': '0px', 'translateY': '0px',
-    'perspective': '400px', 'rotateX': '0deg', 'rotateY': '0deg', 'scaleZ': '1',
-    'rotateZ': '0deg', 'translateZ': '0px'
+    'perspective': '400px', 'rotateX': '5deg', 'rotateY': '0deg', 'scaleZ': '1',
+    'rotateZ': '5deg', 'translateZ': '0px'
 };
 
 var $t; // will hold container where transforms are made
 var win;
+var vars;
 
 jQuery(document).ready(function () {
 
@@ -42,6 +43,9 @@ jQuery(document).ready(function () {
         if ( $gd.settings.loaded ) {
             transform_focus(id);
         }
+
+        vars = $gd.css_vars;
+        console.log(JSON.stringify(vars));
     }
 
     function update_transform(t) {
@@ -53,8 +57,13 @@ jQuery(document).ready(function () {
         // account for scaling
         var scale = parseFloat(t['translateZ']) / 100;
 
+        // ensure we stay in bounds
         if ( x > 0 ) x = 0;
         if ( y > 0 ) y = 0;
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        if ( x < -w ) x = -w;
+        if ( y < -h ) y = -h;
         
         t['translateX'] = x + 'px';
         t['translateY'] = y + 'px';
@@ -172,7 +181,7 @@ jQuery(document).ready(function () {
         $(eid + ' .section').each(function () {
 
             var $s = $(this);
-            $s.addClass('no-transition draggable');
+            $s.addClass('no-transition');
 
             // set initial position values
             var x = $s.css('left').slice(0, -2);
@@ -204,14 +213,19 @@ jQuery(document).ready(function () {
     }
 
     function render_connections() {
-        if ( $(' connection').length > 0 ) {
-            $(' .n-reference').connections('remove');
+        if ( $('connection').length > 0 ) {
+            $('.n-reference').connections('remove');
         }
-        $(' .section .content .n-reference').each(function () {
-            var classes = $(this).attr('class');
-            // get note's referent
-            var to = classes.split('n-reference')[0].trim();
-            to = to.substr(2);
+        $(eid + ' .section .content .n-reference').each(function () {
+            // extract class this links to
+            var classes = $(this).attr('class').split(' ');
+            var to = '';
+            for ( var i = 0; i < classes.length; i++ ) {
+                var c = classes[i];
+                if ( c !== 'n-reference' && c.indexOf('n-') > -1 ) {
+                    to = c.substr(2);
+                }
+            }
             $(this).connections({ to: '.note-' + to });
         });
     }
@@ -281,11 +295,12 @@ jQuery(document).ready(function () {
         html += `<pre class="md content">${content}</pre>`;
         html += '<textarea class="editor-content" />';
         html += '</div>';
-        $(eid_inner).append(html);
+        $s.after(html);
         var $editor = $('.editor');
+        var padding = 100;
         $editor.css({
-            top: top, left: left + width + 50,
-            width: width, height: height
+            top: top, left: left + width + padding,
+            width: width, height: height + padding
         });
         $(eid + ' .editor-heading').val($('.md.heading').text());
         $(eid + ' .editor-content').val($('.md.content').text());
@@ -299,28 +314,35 @@ jQuery(document).ready(function () {
             render_connections();
         });
 
-        // event handler for editor content changes
+        // event handler for editor heading changes
         $(eid + ' .editor-heading').on('keyup change', function () {
             content = $('.editor-heading').val();
-            var clean = $gd.clean(content);
-            var html = `<a class="handle" name="${clean}">${content}</a>`;
-            var $s = $(eid + ` .section#${id}`);
+            var new_id = $gd.clean(content);
+            
+            // get id of the section linked with this editor
+            var $editor_section = $(this).parent().prev();
+            var prev_id = $editor_section.attr('id');
+            if ( $editor_section.hasClass('note') ) {
+                $editor_section.removeClass(`note-${prev_id}`);
+                $editor_section.addClass(`note-${new_id}`);
+            }
+            $editor_section.attr('id', new_id);
+            var html = `<a class="handle" name="${new_id}">${content}</a>`;
+            var $s = $(eid + ` .section#${new_id}`);
             $s.find('.handle-heading').html(html);
-            // todo
-            //$s.attr( 'id', clean );
+            $(this).parent().attr('data-section', new_id);
 
-            // update links
-            // $(eid + ` a`).each(function(){
-            //     var href = $(this).attr('href');
-            //     console.log(href,id);
-            //     if ( href === id ) {
-            //         console.log(href);
-            //         //$(this).attr('href', '#' + id);
-            //     }
-            // });
-            //.attr( 'href', '#' + clean );
+            // update all links to this section
+            var $l = $(eid + ` a[href=#${prev_id}]`);
+            $l.attr('href', '#' + new_id);
+            $l.removeClass(`n-${prev_id}`);
+            if ( $l.hasClass('n-reference') ) {
+                $l.addClass(`n-${new_id}`);
+            }
+            // update toc link
+            var $toc_link = $(eid + ` .info .toc a[href=#${new_id}]`);
+            $toc_link.text(content);
 
-            // update all links on page
             notize();
             render_connections();
         });
@@ -385,8 +407,9 @@ jQuery(document).ready(function () {
         var left = parseFloat( $s.css('left') );
         var top = parseFloat( $s.css('top') );
         var $editor = $(eid + ' .editor');
-        $editor.css('left', left + $s.width() + 50);
-        $editor.css('top', top);
+        var padding = 100;
+        $editor.css('left', left + $s.width() + padding);
+        $editor.css('top', top + padding);
         $editor.css('width', $s.width());
         $editor.css('height', $s.height());
     }
@@ -400,11 +423,6 @@ jQuery(document).ready(function () {
         $s.css({ "top": y + 'px', "left": x + 'px' });
         $s.css({ "width": '200px', "height": '100px' });
         $s.attr('data-x', x).attr('data-y', y);
-        $s.find('.content').click(function () {
-            var content = '';
-            var id = $(this).parent().attr('id');
-            render_editor(id);
-        });
         var s = $gd.get_sections();
         s.push(name);
         $gd.set_sections(s);
@@ -427,7 +445,7 @@ jQuery(document).ready(function () {
 
     function default_section_html(name) {
         var id = $gd.clean(name);
-        var html = '<div class="section heading draggable no-transition" id="' + id + '">';
+        var html = '<div class="section heading no-transition" id="' + id + '">';
         html += '<h2 class="handle-heading">';
         html += '<a class="handle" name="' + id + '">' + name + '</a>'
         html += '</h2>';
@@ -488,6 +506,7 @@ jQuery(document).ready(function () {
 
         // click handler for local links, incuding toc links
         $(eid + ' a[href^=#]').click(function (e) {
+            e.preventDefault();
             var id = this.getAttribute('href').substr(1);
             activate_section(id);
             transform_focus(id);
@@ -528,9 +547,8 @@ jQuery(document).ready(function () {
             } else {
                 scale -= 20;
             }
-            if (scale < -500) {
-                scale = -500;
-            }
+            if (scale < -300) scale = -300;
+            if (scale > 300) scale = 300;
 
             // center scale on cursor position
             var x = event.originalEvent.offsetX;
@@ -615,7 +633,7 @@ jQuery(document).ready(function () {
             })
             .resizable({
                 preserveAspectRatio: false,
-                edges: { left: true, right: true, bottom: true, top: true }
+                edges: { left: false, right: true, bottom: true, top: false }
             })
             .on('resizemove', function (event) {
                 var target = event.target,
@@ -642,7 +660,6 @@ jQuery(document).ready(function () {
                 render_connections();
             })
             .on('doubletap', function (event) {
-                //var id = event.target;//.getAttribute('id');
                 var id = $(event.target).closest('.section').attr('id');
                 render_editor(id);
                 transform_focus(id);
