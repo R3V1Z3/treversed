@@ -237,9 +237,14 @@ connection {
 }
 
 #custom .editor .editor-content {
+  height: calc(100% - 20px);
+}
+
+#custom .editor .editor-content,
+#custom .editor .editor-heading {
+  font-size: 100%;
   padding: 10px;
   width: calc(100% - 20px);
-  height: calc(100% - 20px);
   resize: both;
   background: none;
   color: white;

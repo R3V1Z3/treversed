@@ -273,27 +273,54 @@ jQuery(document).ready(function () {
         var height = $s.height();
 
         var content = toMarkdown($s.find('.content').html());
+        var heading = toMarkdown($s.find('.handle-heading').html());
 
-        var html = '<div class="editor" data-section="' + id + '">';
-        html += '<pre class="md">';
-        html += content;
-        html += '</pre>';
+        var html = `<div class="editor" data-section="${id}">`;
+        html += `<pre class="md heading">${heading}</pre>`;
+        html += '<input class="editor-heading" />';
+        html += `<pre class="md content">${content}</pre>`;
         html += '<textarea class="editor-content" />';
         html += '</div>';
         $(eid_inner).append(html);
         var $editor = $('.editor');
-        //$editor.width( width );
         $editor.css({
             top: top, left: left + width + 50,
             width: width, height: height
         });
-        $(eid + ' .editor-content').val($('.md').text());
+        $(eid + ' .editor-heading').val($('.md.heading').text());
+        $(eid + ' .editor-content').val($('.md.content').text());
 
         // event handler for editor content changes
         $(eid + ' .editor-content').on('keyup change', function () {
             content = $('.editor-content').val();
             var container = '.section#' + id + ' .content';
             $gd.render(content, container);
+            notize();
+            render_connections();
+        });
+
+        // event handler for editor content changes
+        $(eid + ' .editor-heading').on('keyup change', function () {
+            content = $('.editor-heading').val();
+            var clean = $gd.clean(content);
+            var html = `<a class="handle" name="${clean}">${content}</a>`;
+            var $s = $(eid + ` .section#${id}`);
+            $s.find('.handle-heading').html(html);
+            // todo
+            //$s.attr( 'id', clean );
+
+            // update links
+            // $(eid + ` a`).each(function(){
+            //     var href = $(this).attr('href');
+            //     console.log(href,id);
+            //     if ( href === id ) {
+            //         console.log(href);
+            //         //$(this).attr('href', '#' + id);
+            //     }
+            // });
+            //.attr( 'href', '#' + clean );
+
+            // update all links on page
             notize();
             render_connections();
         });
@@ -535,11 +562,11 @@ jQuery(document).ready(function () {
             .on('tap', function (event) {
                 //event.preventDefault();
             })
-            .on('doubletap', function (event) {
-                if ($(event.target).hasClass('inner')) {
+            .on('doubletap', function (e) {
+                if ($(e.target).hasClass('inner')) {
                     // create new section
-                    event.preventDefault();
-                    create_section(event.pageX, event.pageY);
+                    e.preventDefault();
+                    create_section(e.offsetX, e.offsetY);
                 }
             })
             .on('hold', function (event) {
