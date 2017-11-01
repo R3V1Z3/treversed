@@ -232,6 +232,7 @@ connection {
   margin: 12px;
   color: white;
   mix-blend-mode: normal;
+  z-index: 50;
 }
 
 #custom .editor .editor-content {
