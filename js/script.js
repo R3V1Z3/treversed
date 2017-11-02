@@ -40,15 +40,21 @@ jQuery(document).ready(function () {
 
         var hash = window.location.hash;
         if ( hash !== '' ) {
-            $c = $(eid + ` .info .toc a[href=${hash}]`);
+            // resort to default if hash section doesn't exist
+            var $hash = $(eid + ` .info .toc a[href=${hash}]`);
+            if ( $hash.length > 0 ) $c = $hash;
         }
 
-        $c.click().addClass('current');
+        $c.click();
 
         // for cases where only one section exists
         var id = $(eid + ' .section.current').attr('id');
         if ( $gd.settings.loaded ) {
             transform_focus(id);
+        }
+
+        if ( !$gd.settings.loaded ) {
+            register_events_onstartup();
         }
     }
 
@@ -57,8 +63,7 @@ jQuery(document).ready(function () {
         // ensure viewport doesn't go outside bounds
         var x = parseFloat(t['translateX']);
         var y = parseFloat(t['translateY']);
-        // todo: these values are affected by scale
-        // account for scaling
+        
         var scale = parseFloat(t['translateZ']) / 100;
 
         // ensure we stay in bounds
@@ -235,7 +240,6 @@ jQuery(document).ready(function () {
     }
 
     function open_export() {
-
         // open new window
         var xWindow = window.open('export');
         var content = export_content();
@@ -248,10 +252,8 @@ jQuery(document).ready(function () {
 
         // iterate over all sections to get content
         $(eid + ' .section').each(function () {
-
             // get content
             content += toMarkdown($(this).html());
-
             //get section attributes
             var attr = '';
             var px = 'px';
@@ -259,7 +261,6 @@ jQuery(document).ready(function () {
             attr += ',top:' + $(this).position().top + px;
             attr += ',width:' + $(this).width() + px;
             attr += ',height:' + $(this).height() + px;
-
             content += newline + newline;
             content += '&lt;!-- {' + attr + '} -->';
             content += newline + newline;
@@ -314,6 +315,10 @@ jQuery(document).ready(function () {
             content = $('.editor-content').val();
             var container = '.section#' + id + ' .content';
             $gd.render(content, container);
+            // register any newly created/edited links
+            $s.find('a[href^=#]').click(function (e) {
+                register_hash_click(e);
+            });
             notize();
             render_connections();
         });
@@ -331,9 +336,9 @@ jQuery(document).ready(function () {
                 $editor_section.addClass(`note-${new_id}`);
             }
             $editor_section.attr('id', new_id);
-            var html = `<a class="handle" name="${new_id}">${content}</a>`;
             var $s = $(eid + ` .section#${new_id}`);
-            $s.find('.handle-heading').html(html);
+            $s.find('.handle-heading')
+                .html(`<a class="handle" name="${new_id}">${content}</a>`);
             $(this).parent().attr('data-section', new_id);
 
             // update all links to this section
@@ -343,6 +348,8 @@ jQuery(document).ready(function () {
             if ( $l.hasClass('n-reference') ) {
                 $l.addClass(`n-${new_id}`);
             }
+
+            //update_toc();
             // update toc link
             var $toc_link = $(eid + ` .info .toc a[href=#${new_id}]`);
             $toc_link.text(content);
@@ -418,6 +425,18 @@ jQuery(document).ready(function () {
         $editor.css('height', $s.height() + padding);
     }
 
+    function update_toc() {
+        var s = [];
+        $( eid_inner + ' .section a.handle' ).each(function(){
+            s.push($(this).text());
+        });
+        $gd.set_sections(s);
+        $gd.update_toc();
+        $(eid + ' .info .toc a').click(function (e) {
+            register_hash_click(e);
+        });
+    }
+
     function create_section(x, y) {
         var name = 'New Section';
         name = unique_name(name);
@@ -427,18 +446,22 @@ jQuery(document).ready(function () {
         $s.css({ "top": y + 'px', "left": x + 'px' });
         $s.css({ "width": '200px', "height": '100px' });
         $s.attr('data-x', x).attr('data-y', y);
-        var s = $gd.get_sections();
-        s.push(name);
-        $gd.set_sections(s);
-        $gd.update_toc();
-        toc_click( $gd.clean(name) );
+        update_toc();
+        // make this section active by clicking toc link
+        $(eid + ` .toc a[href=#${$gd.clean(name)}]`).click();
 
         // make section current if it's clicked
         $s.click(function (e) {
-            if ( e.target !== this ) return;
-            var id = $(this).attr('id');
-            activate_section(id);
+            register_section_events(e);
         });
+    }
+
+    function register_section_events(e) {
+        var $t = $(e.target);
+        if ( $t.is('a') ) return;
+        
+        var id = $t.closest('.section').attr('id');
+        activate_section(id);
     }
 
     function unique_name(prefix) {
@@ -467,21 +490,89 @@ jQuery(document).ready(function () {
         return html;
     }
 
-    function toc_click(id) {
-        $(eid + ` .info .toc a[href=#${id}]`).click();
-    }
-
     function activate_section(id) {
         var $s = $(eid_inner + ` .section#${id}`);
         // only act if section exists
-        if ($s.length > 0) {
-            // remove .current class from active section
-            $('.section.current').removeClass('current');
-            // remove current toc link
-            $(eid + ' .info .toc a.current').removeClass('current');
-            $s.addClass('current');
-            $(eid + ` .info .toc a[href=#${id}]`).addClass('current');
-        }
+        if ($s.length < 1) return;
+        // remove .current class from active section
+        var $current = $(eid + ' .section.current').removeClass('current');
+        // remove current toc link
+        $(eid + ' .info .toc a.current').removeClass('current');
+        $s.addClass('current');
+        $(eid + ` .info .toc a[href=#${id}]`).addClass('current');
+
+        // remove any other instances of .close button
+        $(eid_inner + ' .close').remove();
+        // create rotate icon
+        $s.append('<div class="close">X</div>');
+        // todo: this is not removing attached section, but it used to work
+        $('.close').click(function(){
+            $(eid + ` .info .toc a[href=#${id}]`).remove();
+            $s.remove();
+        });
+    }
+
+    function register_events_onstartup() {
+
+        // Key events
+        $(document).keyup(function (e) {
+            if ( e.which == 83 && e.altKey ) {
+                // alt-x for export
+                open_export();
+            }
+        });
+
+        $(eid + ' .info .field.selector.app a.id').click(function (e) {
+            // configure url with hash and other needed params
+            var url = $(this).attr('data-id');
+            var css = $gd.settings.css;
+            url += `?css=${css}${location.hash}`;
+
+            // open window, receiveMessage will then wait for Ready message
+            win = window.open(url);
+            win.postMessage('Hello?', '*');
+        });
+
+        // .section interactions
+        interact(eid_inner).ignoreFrom('input, textarea')
+        .draggable({
+            // enable inertial throwing
+            inertia: false,
+            // call this function on every dragmove event
+            onmove: function (event) {
+                $(eid_inner + ' .section .close').remove();
+                var tx = parseFloat(transforms['translateX']) + event.dx;
+                var ty = parseFloat(transforms['translateY']) + event.dy;
+                transforms['translateX'] = tx + 'px';
+                transforms['translateY'] = ty + 'px';
+                update_transform(transforms);
+                render_connections();
+            }
+        })
+            .on('tap', function (event) {
+                //event.preventDefault();
+                $(eid_inner + ' .section .close').remove();
+            })
+            .on('doubletap', function (e) {
+                if ($(e.target).hasClass('inner')) {
+                    // create new section
+                    e.preventDefault();
+                    create_section(e.offsetX, e.offsetY);
+                }
+            })
+            .on('hold', function (event) {
+                // event.clientX
+            });
+    }
+
+    function register_hash_click(e) {
+        e.preventDefault();
+        var id = e.target.getAttribute('href').substr(1);
+        activate_section(id);
+        transform_focus(id);
+        render_connections();
+        // update url hash
+        window.location.hash = '#' + id;
     }
 
     function register_events() {
@@ -503,48 +594,21 @@ jQuery(document).ready(function () {
             }
         }, false);
 
-        $(eid + ' .info .field.selector.app a.id').click(function (e) {
-            
-            // configure url with hash and other needed params
-            var url = $(this).attr('data-id');
-            var css = $gd.settings.css;
-            url += `?css=${css}${location.hash}`;
-
-            // open window, receiveMessage will then wait for Ready message
-            win = window.open(url);
-            win.postMessage('Hello?', '*');
-        });
-
         // click handler for local links, incuding toc links
         $(eid + ' a[href^=#]').click(function (e) {
-            e.preventDefault();
-            var id = this.getAttribute('href').substr(1);
-            activate_section(id);
-            transform_focus(id);
-            render_connections();
-            // update url hash
-            window.location.hash = '#' + id;
+            register_hash_click(e);
         });
 
         // make section current if it's clicked
         $(eid + ' .section').click(function (e) {
-            if ( e.target !== this ) return;
-            var id = $(this).attr('id');
-            activate_section(id);
-        });
-
-        // Key events
-        $(document).keyup(function (e) {
-            if ( e.which == 83 && e.altKey ) {
-                // alt-x for export
-                open_export();
-            }
+            register_section_events(e);
         });
 
         // mousewheel zoom handler
         $(eid_inner).on('wheel', function (event) {
             event.preventDefault();
             if (this !== event.target) return;
+            $(eid_inner + ' .section .close').remove();
             var scale = parseFloat(transforms['translateZ']);
             if (event.originalEvent.deltaY < 0) {
                 scale += 20;
@@ -564,39 +628,8 @@ jQuery(document).ready(function () {
             render_connections();
         });
 
-        // .section interactions
-        interact(eid_inner).draggable({
-            // enable inertial throwing
-            inertia: false,
-            ignoreFrom: '.section',
-            // call this function on every dragmove event
-            onmove: function (event) {
-                var target = event.target;
-                var $target = $(target);
-                var tx = parseFloat(transforms['translateX']) + event.dx;
-                var ty = parseFloat(transforms['translateY']) + event.dy;
-                transforms['translateX'] = tx + 'px';
-                transforms['translateY'] = ty + 'px';
-                update_transform(transforms);
-                render_connections();
-            }
-        })
-            .on('tap', function (event) {
-                //event.preventDefault();
-            })
-            .on('doubletap', function (e) {
-                if ($(e.target).hasClass('inner')) {
-                    // create new section
-                    e.preventDefault();
-                    create_section(e.offsetX, e.offsetY);
-                }
-            })
-            .on('hold', function (event) {
-                // event.clientX
-            });
-
         // section interactions
-        interact(eid + ' .section')//.allowFrom('.handle-heading')
+        interact(eid + ' .section')
             .draggable({
                 // enable inertial throwing
                 inertia: false,
@@ -637,7 +670,7 @@ jQuery(document).ready(function () {
             })
             .resizable({
                 preserveAspectRatio: false,
-                edges: { left: false, right: true, bottom: true, top: false }
+                edges: { left: true, right: true, bottom: true, top: true }
             })
             .on('resizemove', function (event) {
                 var target = event.target,
@@ -651,7 +684,6 @@ jQuery(document).ready(function () {
                 // translate when resizing from top or left edges
                 x += event.deltaRect.left;
                 y += event.deltaRect.top;
-
                 target.setAttribute('data-x', x);
                 target.setAttribute('data-y', y);
 
@@ -660,7 +692,6 @@ jQuery(document).ready(function () {
                 if (is_editor_linked(id)) {
                     position_editor($(target));
                 }
-
                 render_connections();
             })
             .on('doubletap', function (event) {
@@ -669,7 +700,6 @@ jQuery(document).ready(function () {
                 transform_focus(id);
                 render_connections();
             });
-
     }
 
 });

@@ -222,6 +222,27 @@ connection {
   opacity: 0.5;
 }
 
+.section .close {
+  position: absolute;
+  top: -1em;
+  right: -1em;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: black;
+  color: white;
+  font-family: monospace;
+  text-align: center;
+  font-weight: bold;
+  line-height: 1.75em;
+  mix-blend-mode: overlay;
+  cursor: pointer;
+}
+
+.section .close:hover {
+  filter: invert(100%);
+}
+
 /* Editor */
 #custom .editor {
   position: absolute;
