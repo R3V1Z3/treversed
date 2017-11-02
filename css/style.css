@@ -222,7 +222,7 @@ connection {
   opacity: 0.5;
 }
 
-.section .close {
+.section .delete {
   position: absolute;
   top: -1em;
   right: -1em;

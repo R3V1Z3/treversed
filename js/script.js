@@ -157,7 +157,7 @@ jQuery(document).ready(function () {
             }
 
             // row_height will be the height of the tallest section in the current row
-            if (height > row_height) {
+            if ( height > row_height ) {
                 row_height = height;
             }
 
@@ -170,11 +170,17 @@ jQuery(document).ready(function () {
                     var prev_width = $(this).prev('.section').width() + padding;
                     // setup allowed_width to enforce single column when p tag used for heading
                     var allowed_width = w;
-                    if ( $gd.settings.heading === 'p' || $gd.settings.heading === 'lyrics' ) allowed_width = prev_width;
+                    if ( $gd.settings.heading === 'p' || $gd.settings.heading === 'lyrics' ) {
+                        allowed_width = prev_width;
+                    }
                     // increment height if width of document is surpassed
-                    if (left > allowed_width - (prev_width * 2)) {
+                    if ( left > allowed_width - (prev_width * 1) ) {
                         left = w / divisor;
                         top += row_height + padding;
+                        if ( top + row_height > h ) {
+                            var h2 = $('.inner').height();
+                            $('.inner').height( h2 + h/4 );
+                        }
                         row_height = 0;
                     } else {
                         left += prev_width;
@@ -459,7 +465,6 @@ jQuery(document).ready(function () {
     function register_section_events(e) {
         var $t = $(e.target);
         if ( $t.is('a') ) return;
-        
         var id = $t.closest('.section').attr('id');
         activate_section(id);
     }
@@ -502,12 +507,15 @@ jQuery(document).ready(function () {
         $(eid + ` .info .toc a[href=#${id}]`).addClass('current');
 
         // remove any other instances of .close button
-        $(eid_inner + ' .close').remove();
+        $(eid_inner + ' .delete').remove();
         // create rotate icon
-        $s.append('<div class="close">X</div>');
+        $s.append('<div class="delete">X</div>');
         // todo: this is not removing attached section, but it used to work
-        $('.close').click(function(){
-            $(eid + ` .info .toc a[href=#${id}]`).remove();
+        // click event is somehow being overriden
+        var $close = $s.find('.delete');
+        $close.click(function(e){
+            var $s = $(e.target).closest('.section');
+            $(eid + ` .info .toc a[href=#${$s.attr('id')}]`).remove();
             $s.remove();
         });
     }
@@ -540,7 +548,7 @@ jQuery(document).ready(function () {
             inertia: false,
             // call this function on every dragmove event
             onmove: function (event) {
-                $(eid_inner + ' .section .close').remove();
+                $(eid_inner + ' .section .delete').remove();
                 var tx = parseFloat(transforms['translateX']) + event.dx;
                 var ty = parseFloat(transforms['translateY']) + event.dy;
                 transforms['translateX'] = tx + 'px';
@@ -551,7 +559,6 @@ jQuery(document).ready(function () {
         })
             .on('tap', function (event) {
                 //event.preventDefault();
-                $(eid_inner + ' .section .close').remove();
             })
             .on('doubletap', function (e) {
                 if ($(e.target).hasClass('inner')) {
@@ -608,7 +615,7 @@ jQuery(document).ready(function () {
         $(eid_inner).on('wheel', function (event) {
             event.preventDefault();
             if (this !== event.target) return;
-            $(eid_inner + ' .section .close').remove();
+            $(eid_inner + ' .section .delete').remove();
             var scale = parseFloat(transforms['translateZ']);
             if (event.originalEvent.deltaY < 0) {
                 scale += 20;
