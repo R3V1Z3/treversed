@@ -1,9 +1,4 @@
-var transforms = {
-    'scale': 1, 'translateX': '0px', 'translateY': '0px',
-    'perspective': '400px', 'rotateX': '5deg', 'rotateY': '0deg', 'scaleZ': '1',
-    'rotateZ': '5deg', 'translateZ': '0px'
-};
-
+var transforms = {}; // holds initial transform
 var $t; // will hold container where transforms are made
 var win;
 var vars;
@@ -25,6 +20,8 @@ jQuery(document).ready(function () {
     var inner_height = $(eid_inner).height();
 
     function main() {
+
+        treversed();
         $t = $('.inner').addClass('inner no-transition');
 
         position_sections();
@@ -33,7 +30,28 @@ jQuery(document).ready(function () {
         register_events();
         render_connections();
         update_transform(transforms);
+        must_stay_focused();
+    }
 
+    // for the moment, this same code base will be used for multiple apps
+    // treversed() will serve the differences for now until larger changes are needed
+    function treversed() {
+        transforms = {
+            'scale': 1, 'translateX': '0px', 'translateY': '0px',
+            'perspective': '400px', 'rotateX': '0deg', 'rotateY': '0deg', 'scaleZ': '1',
+            'rotateZ': '0deg', 'translateZ': '0px'
+        };
+        if ( $gd.settings.title === 'TreversED' ) {
+            transforms = {
+                'scale': 1, 'translateX': '0px', 'translateY': '0px',
+                'perspective': '400px', 'rotateX': '5deg', 'rotateY': '0deg', 'scaleZ': '1',
+                'rotateZ': '5deg', 'translateZ': '0px'
+            };
+        }
+    }
+
+    // initial routine to update current link and set starting focus
+    function must_stay_focused() {
         // get current section based on current toc link
         var $c = $(eid + ' .info .toc a.current');
         $c.removeClass('current');
