@@ -222,10 +222,8 @@ connection {
   opacity: 0.5;
 }
 
-.section .delete {
+.section .icon {
   position: absolute;
-  top: -1em;
-  right: -1em;
   width: 2em;
   height: 2em;
   border-radius: 50%;
@@ -237,6 +235,26 @@ connection {
   line-height: 1.75em;
   mix-blend-mode: overlay;
   cursor: pointer;
+  opacity: 0.25;
+}
+
+.section .icon:hover {
+  opacity: 1;
+}
+
+.section .icon.delete {
+  top: -1em;
+  left: -1em;
+}
+
+.section .icon.resize {
+  bottom: -1em;
+  right: -1em;
+}
+
+.section .icon.rotate {
+  top: -1em;
+  right: -1em;
 }
 
 .section .close:hover {

@@ -306,8 +306,10 @@ jQuery(document).ready(function () {
         html += `<pre class="md content">${content}</pre>`;
         html += '<textarea class="editor-content" />';
         html += '</div>';
+        
         $s.after(html);
         var $editor = $('.editor');
+        console.log($editor);
         var padding = 100;
         $editor.css({
             top: top, left: left + width + padding,
@@ -366,16 +368,6 @@ jQuery(document).ready(function () {
 
         // restore transform
         update_transform(transforms);
-
-        // hide the editor if anything else is clicked
-        $(eid_inner).on('click', function (e) {
-            // if (e.target !== this) return;
-            if ($(e.target).closest(".section").length === 0) {
-                if ($(e.target).closest(".editor").length === 0) {
-                    $('.editor').remove();
-                }
-            }
-        });
 
         $(eid + ' .editor .md').remove();
 
@@ -437,7 +429,7 @@ jQuery(document).ready(function () {
             s.push($(this).text());
         });
         $gd.set_sections(s);
-        $gd.update_toc();
+        $gd.update_toc(s);
         $(eid + ' .info .toc a').click(function (e) {
             register_hash_click(e);
         });
@@ -448,18 +440,23 @@ jQuery(document).ready(function () {
         name = unique_name(name);
         var html = default_section_html(name);
         $('.inner').append(html);
-        $s = $('#' + $gd.clean(name));
+        var id = $gd.clean(name);
+        $s = $('#' + id);
         $s.css({ "top": y + 'px', "left": x + 'px' });
         $s.css({ "width": '200px', "height": '100px' });
         $s.attr('data-x', x).attr('data-y', y);
         update_toc();
-        // make this section active by clicking toc link
-        $(eid + ` .toc a[href=#${$gd.clean(name)}]`).click();
 
+        // make this section active by clicking toc link
+        $(eid + ` .toc a[href=#${id}]`).click();
         // make section current if it's clicked
         $s.click(function (e) {
             register_section_events(e);
         });
+
+        render_editor(id);
+        transform_focus(id);
+        render_connections();
     }
 
     function register_section_events(e) {
@@ -506,18 +503,31 @@ jQuery(document).ready(function () {
         $s.addClass('current');
         $(eid + ` .info .toc a[href=#${id}]`).addClass('current');
 
-        // remove any other instances of .close button
-        $(eid_inner + ' .delete').remove();
-        // create rotate icon
-        $s.append('<div class="delete">X</div>');
-        // todo: this is not removing attached section, but it used to work
-        // click event is somehow being overriden
-        var $close = $s.find('.delete');
-        $close.click(function(e){
+        create_buttons(id);
+    }
+
+    function create_buttons(id) {
+        var $s = $(eid_inner + ` .section#${id}`);
+        // delete all extant .icon first
+        $(eid_inner + ' .section .icon').remove();
+        
+        // DELETE
+        $s.append('<div class="icon delete">X</div>');
+        var $delete = $s.find('.delete');
+        $delete.click(function(e){
             var $s = $(e.target).closest('.section');
             $(eid + ` .info .toc a[href=#${$s.attr('id')}]`).remove();
             $s.remove();
+            $(eid_inner + ' .editor').remove();
         });
+
+        // RESIZE
+        // functionality is handled via interactjs .inner event
+        $s.append('<div class="icon resize">⤨</div>');
+
+        // ROTATE
+        // functionality is handled via interactjs .inner event
+        $s.append('<div class="icon rotate">↻</div>');
     }
 
     function register_events_onstartup() {
@@ -542,13 +552,13 @@ jQuery(document).ready(function () {
         });
 
         // .section interactions
-        interact(eid_inner).ignoreFrom('input, textarea')
+        interact(eid_inner).ignoreFrom('input, textarea, .section')
         .draggable({
             // enable inertial throwing
             inertia: false,
             // call this function on every dragmove event
             onmove: function (event) {
-                $(eid_inner + ' .section .delete').remove();
+                $(eid_inner + ' .section .icon').remove();
                 var tx = parseFloat(transforms['translateX']) + event.dx;
                 var ty = parseFloat(transforms['translateY']) + event.dy;
                 transforms['translateX'] = tx + 'px';
@@ -557,19 +567,20 @@ jQuery(document).ready(function () {
                 render_connections();
             }
         })
-            .on('tap', function (event) {
-                //event.preventDefault();
-            })
-            .on('doubletap', function (e) {
-                if ($(e.target).hasClass('inner')) {
-                    // create new section
-                    e.preventDefault();
-                    create_section(e.offsetX, e.offsetY);
-                }
-            })
-            .on('hold', function (event) {
-                // event.clientX
-            });
+        .on('tap', function (event) {
+            //event.preventDefault();
+            $('.editor').remove();
+        })
+        .on('doubletap', function (e) {
+            if ($(e.target).hasClass('inner')) {
+                // create new section
+                e.preventDefault();
+                create_section(e.offsetX, e.offsetY);
+            }
+        })
+        .on('hold', function (event) {
+            // event.clientX
+        });
     }
 
     function register_hash_click(e) {
@@ -615,7 +626,7 @@ jQuery(document).ready(function () {
         $(eid_inner).on('wheel', function (event) {
             event.preventDefault();
             if (this !== event.target) return;
-            $(eid_inner + ' .section .delete').remove();
+
             var scale = parseFloat(transforms['translateZ']);
             if (event.originalEvent.deltaY < 0) {
                 scale += 20;
@@ -649,13 +660,13 @@ jQuery(document).ready(function () {
                 // enable autoScroll
                 autoScroll: true,
                 // call this function on every dragmove event
-                onmove: function (event) {
-                    var target = event.target;
+                onmove: function (e) {
+                    var target = e.target;
                     var $target = $(target);
 
                     // keep the dragged position in the data-x/data-y attributes
-                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + e.dx;
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + e.dy;
 
                     $target.css('top', y + 'px');
                     $target.css('left', x + 'px');
@@ -677,20 +688,20 @@ jQuery(document).ready(function () {
             })
             .resizable({
                 preserveAspectRatio: false,
-                edges: { left: true, right: true, bottom: true, top: true }
+                edges: { left: false, right: true, bottom: true, top: false }
             })
-            .on('resizemove', function (event) {
-                var target = event.target,
+            .on('resizemove', function (e) {
+                var target = e.target,
                     x = (parseFloat(target.getAttribute('data-x')) || 0),
                     y = (parseFloat(target.getAttribute('data-y')) || 0);
 
                 // update the element's style
-                target.style.width = event.rect.width + 'px';
-                target.style.height = event.rect.height + 'px';
+                target.style.width = e.rect.width + 'px';
+                target.style.height = e.rect.height + 'px';
 
                 // translate when resizing from top or left edges
-                x += event.deltaRect.left;
-                y += event.deltaRect.top;
+                x += e.deltaRect.left;
+                y += e.deltaRect.top;
                 target.setAttribute('data-x', x);
                 target.setAttribute('data-y', y);
 
@@ -701,7 +712,7 @@ jQuery(document).ready(function () {
                 }
                 render_connections();
             })
-            .on('doubletap', function (event) {
+            .on('doubletap', function (e) {
                 var id = $(event.target).closest('.section').attr('id');
                 render_editor(id);
                 transform_focus(id);
