@@ -53,9 +53,8 @@ body, html, #wrapper, .container {
   display: block;
   width: 400px;
   height: 200px;
-  min-width: 200px;
-  min-height: 100px;
-  max-height: 800px;
+  min-width: 20px;
+  min-height: 20px;
   position: absolute;
   border-radius: 0;
   padding: 10px 15px;
@@ -158,18 +157,6 @@ a.n-reference {
   border-radius: 5px;
   border: 1px dashed firebrick;
   background: rgba(0,0,0,0.025);
-}
-
-.reference .handle-heading {
-  float: left;
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-.handle-heading {
-  z-index: 1;
-  cursor: move;
 }
 
 .section a.handle {

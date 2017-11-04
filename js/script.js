@@ -284,7 +284,9 @@ jQuery(document).ready(function () {
         update_transform(t);
     }
 
-    function render_editor(id) {
+    // id: section id this will be linked with
+    // focus: location in text to place cursor
+    function render_editor(id, focus) {
         // remove any existing editors first
         $(eid + ' .editor').remove();
 
@@ -309,7 +311,6 @@ jQuery(document).ready(function () {
         
         $s.after(html);
         var $editor = $('.editor');
-        console.log($editor);
         var padding = 100;
         $editor.css({
             top: top, left: left + width + padding,
@@ -321,7 +322,9 @@ jQuery(document).ready(function () {
         // event handler for editor content changes
         $(eid + ' .editor-content').on('keyup change', function () {
             content = $('.editor-content').val();
-            var container = '.section#' + id + ' .content';
+            // get the attached section's current id
+            var id = $(this).closest('.editor').attr('data-section');
+            var container = `.section#${id} .content`;
             $gd.render(content, container);
             // register any newly created/edited links
             $s.find('a[href^=#]').click(function (e) {
@@ -347,7 +350,9 @@ jQuery(document).ready(function () {
             var $s = $(eid + ` .section#${new_id}`);
             $s.find('.handle-heading')
                 .html(`<a class="handle" name="${new_id}">${content}</a>`);
-            $(this).parent().attr('data-section', new_id);
+            
+            // update parent editor with the newly linked id
+            $(this).closest('.editor').attr('data-section', new_id);
 
             // update all links to this section
             var $l = $(eid + ` a[href=#${prev_id}]`);
@@ -426,7 +431,7 @@ jQuery(document).ready(function () {
     function update_toc() {
         var s = [];
         $( eid_inner + ' .section a.handle' ).each(function(){
-            s.push($(this).text());
+            s.push( $gd.clean($(this).text()) );
         });
         $gd.set_sections(s);
         $gd.update_toc(s);
@@ -435,9 +440,9 @@ jQuery(document).ready(function () {
         });
     }
 
-    function create_section(x, y) {
-        var name = 'New Section';
-        name = unique_name(name);
+    function create_section(x, y, prefix) {
+        if ( prefix === '' || prefix === undefined ) prefix = 'Section';
+        name = unique_name(prefix);
         var html = default_section_html(name);
         $('.inner').append(html);
         var id = $gd.clean(name);
@@ -455,7 +460,7 @@ jQuery(document).ready(function () {
         });
 
         render_editor(id);
-        transform_focus(id);
+        create_buttons(id);
         render_connections();
     }
 
@@ -510,16 +515,6 @@ jQuery(document).ready(function () {
         var $s = $(eid_inner + ` .section#${id}`);
         // delete all extant .icon first
         $(eid_inner + ' .section .icon').remove();
-        
-        // DELETE
-        $s.append('<div class="icon delete">X</div>');
-        var $delete = $s.find('.delete');
-        $delete.click(function(e){
-            var $s = $(e.target).closest('.section');
-            $(eid + ` .info .toc a[href=#${$s.attr('id')}]`).remove();
-            $s.remove();
-            $(eid_inner + ' .editor').remove();
-        });
 
         // RESIZE
         // functionality is handled via interactjs .inner event
@@ -528,6 +523,25 @@ jQuery(document).ready(function () {
         // ROTATE
         // functionality is handled via interactjs .inner event
         $s.append('<div class="icon rotate">↻</div>');
+
+        // DELETE
+
+        // only create .delete icon if more than one section exists
+        if ( $(eid_inner + ' .section').length < 2 ) return;
+
+        $s.append('<div class="icon delete">X</div>');
+        var $delete = $s.find('.delete');
+        $delete.click(function(e){
+            var $s = $(e.target).closest('.section');
+            $(eid + ` .info .toc a[href=#${$s.attr('id')}]`).remove();
+            $s.remove();
+            $(eid_inner + ' .editor').remove();
+            // add header class to first section if no header exists
+            if ( $(eid_inner + ' .section.header').length < 1 ) {
+                var $h = $(eid_inner + ' .section:first-child');
+                $h.removeClass('heading').addClass('header');
+            }
+        });
     }
 
     function register_events_onstartup() {
@@ -698,12 +712,6 @@ jQuery(document).ready(function () {
                 // update the element's style
                 target.style.width = e.rect.width + 'px';
                 target.style.height = e.rect.height + 'px';
-
-                // translate when resizing from top or left edges
-                x += e.deltaRect.left;
-                y += e.deltaRect.top;
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
 
                 // check if editor is open for this section
                 var id = target.getAttribute('id');
