@@ -552,6 +552,11 @@ jQuery(document).ready(function () {
         $(eid + ` .info .toc a[href=#${id}]`).addClass('current');
 
         create_buttons(id);
+
+        // move editor to clicked section if already opened
+        if ( $(eid_inner + ' .editor').length > 0 ) {
+            render_editor(id);
+        }
     }
 
     function create_buttons(id) {
@@ -597,17 +602,6 @@ jQuery(document).ready(function () {
             }
         });
 
-        $(eid + ' .info .field.selector.app a.id').click(function (e) {
-            // configure url with hash and other needed params
-            var url = $(this).attr('data-id');
-            var css = $gd.settings.css;
-            url += `?css=${css}${location.hash}`;
-
-            // open window, receiveMessage will then wait for Ready message
-            win = window.open(url);
-            win.postMessage('Hello?', '*');
-        });
-
         // .section interactions
         interact(eid_inner).ignoreFrom('input, textarea, .section')
         .draggable({
@@ -651,6 +645,17 @@ jQuery(document).ready(function () {
     }
 
     function register_events() {
+
+        $(eid + ' .info .field.selector.app a.id').click(function (e) {
+            // configure url with hash and other needed params
+            var url = $(this).attr('data-id');
+            var css = $gd.settings.css;
+            url += `?css=${css}${location.hash}`;
+
+            // open window, receiveMessage will then wait for Ready message
+            win = window.open(url);
+            win.postMessage('Hello?', '*');
+        });
 
         // listen for Ready messages from any opened windows
         window.addEventListener( 'message', function(e) {
