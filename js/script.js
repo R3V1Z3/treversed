@@ -84,14 +84,6 @@ jQuery(document).ready(function () {
         var y = parseFloat(t['translateY']);
         
         var scale = parseFloat(t['translateZ']) / 100;
-
-        // ensure we stay in bounds
-        // if ( x > 0 ) x = 0;
-        // if ( y > 0 ) y = 0;
-        // var w = window.innerWidth;
-        // var h = window.innerHeight;
-        // if ( x < -w ) x = -w;
-        // if ( y < -h ) y = -h;
         
         t['translateX'] = x + 'px';
         t['translateY'] = y + 'px';
@@ -240,8 +232,8 @@ jQuery(document).ready(function () {
             var $s = $(this);
             var x = parseFloat( $s.css('left') );
             var y = parseFloat( $s.css('top') );
-            $s.css('left', x + padding_x + 'px');
-            $s.css('top', y + padding_y + 'px');
+            $s.css('left', x - least_x + padding_x + 'px');
+            $s.css('top', y - least_y + padding_y + 'px');
         });
     }
 
