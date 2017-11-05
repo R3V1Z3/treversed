@@ -72,7 +72,7 @@ jQuery(document).ready(function () {
             transform_focus(id);
         }
 
-        if ( !$gd.settings.loaded ) {
+        if ( $gd.settings.loaded ) {
             register_events_onstartup();
         }
     }
