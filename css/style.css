@@ -13,6 +13,16 @@
   transition: none;
 }
 
+.link-clone {
+  position: absolute;
+  background: firebrick;
+  color: ivory;
+  border-radius: 5px;
+  font-size: 2em;
+  padding: 0.25em;
+  mix-blend-mode: color-burn;
+}
+
 @page { size:8.5in 11in; margin: 0.25cm }
 
 * {
