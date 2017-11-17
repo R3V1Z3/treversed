@@ -41,16 +41,6 @@ Appearance <!-- {$gd_css} -->
 
 <!-- {$gd_slider_fontsize="130,50,300,1,%"} -->
 
-<!-- {$gd_select_primary-color} -->
-- Default
-- Slategrey
-- Burlywood
-- Green
-- Magenta
-- Brown
-- Red
-- Dodgerblue
-
 Highlight Styles <!-- {$gd_select_highlight} -->
 - None
 - Default
@@ -74,6 +64,8 @@ Highlight Styles <!-- {$gd_select_highlight} -->
 - Tomorrow Night
 - Tomorrow
 - Vs
+
+<!-- {$gd_theme_variables} -->
 
 <!-- {$gd_collapsible_end_theme} -->
 

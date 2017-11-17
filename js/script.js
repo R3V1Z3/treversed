@@ -20,8 +20,6 @@ jQuery(document).ready(function () {
     var inner_height = $(eid_inner).height();
 
     function main() {
-        $('connection').remove();
-
         treversed();
         $t = $('.inner').addClass('no-transition');
 
@@ -30,8 +28,8 @@ jQuery(document).ready(function () {
         configure_sections();
         notize();
         register_events();
-        render_connections();
         update_transform(transforms);
+        render_connections();
         local_links();
         must_stay_focused();
     }
@@ -78,9 +76,7 @@ jQuery(document).ready(function () {
             transform_focus(id);
         }
 
-        if ( !$gd.settings.loaded ) {
-            register_events_onstartup();
-        }
+        register_events_onstartup();
     }
 
     function update_transform(t) {
@@ -655,6 +651,11 @@ jQuery(document).ready(function () {
     }
 
     function register_events() {
+
+        // remove connections when loading new file
+        $(eid + ' .info .field.selector.gist a.id').click(function (e) {
+            $('.n-reference').connections('remove');
+        });
 
         $(eid + ' .info .field.selector.app a.id').click(function (e) {
             // configure url with hash and other needed params
