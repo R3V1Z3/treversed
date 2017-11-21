@@ -20,9 +20,14 @@ jQuery(document).ready(function () {
     var inner_height = $(eid_inner).height();
 
     function main() {
-        treversed();
-        $t = $('.inner').addClass('no-transition');
 
+        // do nothing if user has selected different theme
+        if ( $gd.status_has('theme-changed') ) return;
+
+        // set container to be used for transforms
+        $t = $(eid_inner).addClass('no-transition');
+        
+        treversed();
         position_sections();
         add_padding();
         configure_sections();
@@ -72,7 +77,7 @@ jQuery(document).ready(function () {
 
         // for cases where only one section exists
         var id = $(eid + ' .section.current').attr('id');
-        if ( $gd.settings.loaded ) {
+        if ( $gd.is_loaded ) {
             transform_focus(id);
         }
 
@@ -112,6 +117,34 @@ jQuery(document).ready(function () {
         $(eid_inner + ' .section.current').css('transform', f);
     }
 
+    function variable_html( v, el ) {
+        let c = '';
+        if ( v !== '' ) {
+            if ( $gd.begins( v, 'gd_section_style' ) ) {
+                const x = v.split('=');
+                // return content after assignment and with quotes removed
+                if ( x.length > 1 ) c = x[1].slice(1, -1);          
+                return [c, 'section'];
+            }
+        }
+        return c;
+    };
+
+    function render_variables(container) {
+        const variables = $gd.get_variables(container);
+        variables.forEach((v) => {
+            const variable = v[0], el = v[1];
+            const result = variable_html( variable, el );
+            if ( result.length < 1 ) return;
+            const content = result[0], r = result[1];
+            if ( r === 'section' ) {
+                // merge content to style of closest section
+                let s = el.closest('.section');
+                s.style.cssText = content;
+            }
+        });
+    }
+
     function position_sections() {
         
         // width and height optimizations can be done via themes
@@ -119,33 +152,8 @@ jQuery(document).ready(function () {
         var w = inner_width;
         var h = inner_height;
 
-        var $sections = $('.section *');
-        if ($sections.length > 0) {
-            // find attributes and position section
-            $sections.children().each(function () {
-                var comments = $(this).getComments();
-                if (comments.length > 0) {
-                    // comment found, extract attributes
-                    var text = comments[0];
-                    var s = text.substr(text.indexOf("{") + 1).split('}')[0];
-                    var pairs = s.split(',');
-                    for (var i = 0; i < pairs.length; i++) {
-                        var key = pairs[i].split(':')[0];
-                        var value = pairs[i].split(':')[1];
-                        if (key === 'left') {
-                            value = parseFloat(value);// + w / 2;
-                        } else if (key === 'top') {
-                            value = parseFloat(value);// + h / 2;
-                        } else if (key === 'transform') {
-                            // special case, we'll add a data-transform attr
-                            $(this).closest('.section').css('transform', value);
-                            $(this).closest('.section').attr('data-transform', value);
-                        }
-                        $(this).closest('.section').css(key, value);
-                    }
-                }
-            });
-        }
+        // find and render gd_section_style variables
+        render_variables('.section *');
 
         // now position elements that don't have position comments
         var counter = 0;
@@ -491,7 +499,7 @@ jQuery(document).ready(function () {
 
     function create_section(x, y, prefix) {
         if ( prefix === '' || prefix === undefined ) prefix = 'Section';
-        name = unique_name(prefix);
+        name = $gd.unique( prefix, '#' );
         var html = default_section_html(name);
         $('.inner').append(html);
         var id = $gd.clean(name);
@@ -518,19 +526,6 @@ jQuery(document).ready(function () {
         if ( $t.is('a') ) return;
         var id = $t.closest('.section').attr('id');
         activate_section(id);
-    }
-
-    function unique_name(prefix) {
-        var x = 1;
-        do {
-            var n = prefix + ' ' + x;
-            // check if id already exists
-            if ($('#' + $gd.clean(n)).length === 0) {
-                return n;
-            }
-            x++;
-        }
-        while (x < 200);
     }
 
     function default_section_html(name) {

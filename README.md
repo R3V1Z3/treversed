@@ -5,26 +5,26 @@ Where the brain meets an open canvas built to help it do creative magic. Write, 
 *   [What’s Markdown?](#what-is-markdown)
 *   [How do I use this beast?](#how-to-use-treversed)
 
-<!-- {left:75px,top:137px,width:348px,height:262px} -->
+<!-- {$gd_section_style="left:75px;top:137px;width:348px;height:262px;"} -->
 ## About TreversED
 
 TreversED parses Markdown documents into sections and renders them in a large interactive canvas. Users can navigate the documents by clicking local links or via the `Contents` section in the `Info` panel.
 *   [What’s this Markdown?](#what-is-markdown)
 *   [How do I use Treverse?](#how-to-use-treversed)
 
-<!-- {left:240px,top:575.7999877929688px,width:420px,height:250px} -->
+<!-- {$gd_section_style="left:240px;top:575.7999877929688px;width:420px;height:250px;"} -->
 ## What is Markdown
 
 Markdown is a simple, plain text language sort of like BBCode. It lets you create documents quickly using basic symbols.
 *   [How do I use Treverse?](#how-to-use-treversed)
 
-<!-- {left:640px,top:16px,width:422px,height:158px} -->
+<!-- {$gd_section_style="left:640px;top:16px;width:422px;height:158px;"} -->
 ## How to use TreversED
 
 It’s easy. Create a file at GitHub Gist, get the file’s ID then paste it in the Gist field in the Info panel.
 *   [Cool, take me back to the start.](#treversed)
 
-<!-- {left:828px,top:429px,width:416px,height:166px} -->
+<!-- {$gd_section_style="left:828px;top:429px;width:416px;height:166px;"} -->
 
 
 ## Examples <!-- {$gd_info} -->
