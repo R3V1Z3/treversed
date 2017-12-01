@@ -26,7 +26,6 @@ It’s easy. Create a file at GitHub Gist, get the file’s ID then paste it in 
 
 <!-- {$gd_section_style="left:828px;top:429px;width:416px;height:166px;"} -->
 
-
 ## Examples <!-- {$gd_info} -->
 <!-- {$gd_help_ribbon} -->
 
