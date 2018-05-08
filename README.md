@@ -68,20 +68,6 @@ Highlight Styles <!-- {$gd_select_highlight} -->
 
 <!-- {$gd_collapsible_end_theme} -->
 
-<!-- {$gd_collapsible_perspective} -->
-
-- <!-- {$gd_slider_scale="1,0.1,6,0.01"} -->
-- <!-- {$gd_slider_translateX="0,-2000,2000,1,px"} -->
-- <!-- {$gd_slider_translateY="0,-2000,2000,1,px"} -->
-- <!-- {$gd_slider_perspective=4200,0,2000,1,px"} -->
-- <!-- {$gd_slider_rotateX="0,0,360,1,deg"} -->
-- <!-- {$gd_slider_rotateY="0,0,360,1,deg"} -->
-- <!-- {$gd_slider_scaleZ="1,1,5,0.1"} -->
-- <!-- {$gd_slider_rotateZ="0,0,360,1,deg"} -->
-- <!-- {$gd_slider_translateZ="0,-500,500,1,px"} -->
-
-<!-- {$gd_collapsible_end_perspective} -->
-
 <!-- {$gd_collapsible_contents} -->
 
 <!-- {$gd_toc} -->
