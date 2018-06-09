@@ -74,18 +74,4 @@ Highlight Styles <!-- {$gd_select_highlight} -->
 
 <!-- {$gd_collapsible_end_contents} -->
 
-<!-- {$gd_collapsible_launch} -->
-
-Try your creation across various apps.
-
-App <!-- {$gd_selector_app} -->
-- [Treverse](//ugotsta.github.io/treverse/)
-- [GitDown](//ugotsta.github.io/gitdown/)
-- [Downslide](//ugotsta.github.io/downslide/)
-- [Entwine](//ugotsta.github.io/downslide/)
-- [CHEATScheat](//ugotsta.github.io/cheats/)
-- [Beatdown](//ugotsta.github.io/beatdown/)
-
-<!-- {$gd_collapsible_end_launch} -->
-
 <!-- {$gd_hide} -->
