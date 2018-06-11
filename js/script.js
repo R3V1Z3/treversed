@@ -23,8 +23,6 @@ function main() {
         // somehow get transform values and make adjustments based on them
         return;
     }
-    //$('.n-reference').connections('remove');
-    $('connection').remove();
 
     // set container to be used for transforms
     $t = $(eid_inner).addClass('no-transition');
@@ -373,6 +371,8 @@ function render_editor(id, focus) {
         // get the attached section's current id
         var id = $(this).closest('.editor').attr('data-section');
         var container = `.section#${id} .content`;
+        // remove any existing connections before re-rendering content
+        if ( $('connection').length > 0 ) $('.n-reference').connections('remove');
         gd.render(content, container);
         // register any newly created/edited links
         $s.find('a[href^=#]').click(function (e) {
